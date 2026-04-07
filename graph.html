@@ -47,6 +47,9 @@ data.forEach(d=>{
   tempSum += d.temp;
 });
 
+// 🔴 月順ソート
+const labels = Object.keys(monthly).sort();
+
 // 表示
 document.getElementById("total").innerText =
 "総収量: " + totalAll;
@@ -60,8 +63,6 @@ document.getElementById("tempAvg").innerText =
 "平均ハウス内気温: " + avgTemp + "℃";
 
 // グラフ
-const labels = Object.keys(monthly);
-
 const datasets = ["SS","S","M","L","LL","LLL","NG"].map(size=>({
   label:size,
   data:labels.map(m=>monthly[m][size])
