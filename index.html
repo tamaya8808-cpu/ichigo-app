@@ -3,153 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>いちご栽培管理</title>
+<title>いちご管理</title>
 
 <style>
-body { font-family: sans-serif; padding: 15px; background:#f5f5f5; }
-h2 { text-align:center; }
-input, button {
-  width:100%;
-  padding:12px;
-  margin:5px 0;
-  font-size:16px;
-}
-button {
-  background:#2e7d32;
-  color:white;
-  border:none;
-  border-radius:8px;
-}
-.card {
-  background:white;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-}
-.red { color:red; font-weight:bold; }
-img { width:100%; margin-top:5px; }
+body { font-family:sans-serif; padding:15px; background:#f5f5f5; }
+input, button { width:100%; padding:10px; margin:5px 0; }
+button { background:#2e7d32; color:#fff; border:none; }
 </style>
 </head>
 
 <body>
 
-<h2>🍓 BS8-9 栽培管理</h2>
+<h2>🍓 栽培管理</h2>
 
 <input type="date" id="date">
-<input type="text" id="line" placeholder="列番号">
+<input type="text" id="line" placeholder="列">
 
-<h3>天気</h3>
-<input type="text" id="weather">
-<button onclick="setWeather('晴れ')">☀️</button>
-<button onclick="setWeather('曇り')">☁️</button>
-<button onclick="setWeather('雨')">🌧</button>
-
-<input type="number" id="outside_temp" placeholder="外気温">
+<h3>ハウス内環境</h3>
+<input type="number" id="temp" placeholder="ハウス内気温（℃）">
 <input type="number" id="humidity" placeholder="湿度">
 
-<h3>給液</h3>
-<input type="number" id="in_ec" placeholder="EC">
-<input type="number" id="in_ph" placeholder="pH">
-<input type="time" id="in_time">
+<h3>収量</h3>
+<input type="number" id="ss" placeholder="SS">
+<input type="number" id="s" placeholder="S">
+<input type="number" id="m" placeholder="M">
+<input type="number" id="l" placeholder="L">
+<input type="number" id="ll" placeholder="2L">
+<input type="number" id="lll" placeholder="3L">
+<input type="number" id="ng" placeholder="規格外">
 
-<h3>廃液</h3>
-<input type="number" id="out_ec" placeholder="EC">
-<input type="number" id="out_ph" placeholder="pH">
-<input type="time" id="out_time">
+<button onclick="save()">保存</button>
 
-<h3>勤務時間</h3>
-<input type="time" id="work_start">
-<input type="time" id="work_end">
-
-<input type="text" id="note" placeholder="メモ">
-<input type="file" id="photo">
-
-<button id="saveBtn">保存</button>
-<button id="resetBtn">全削除</button>
-
-<div id="list"></div>
+<button onclick="location.href='graph.html'">
+📊 グラフを見る
+</button>
 
 <script>
-let data = JSON.parse(localStorage.getItem("ichigo") || "[]");
-let photoData = "";
+let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
 
-function setWeather(w){
-  document.getElementById("weather").value = w;
-}
-
-document.getElementById("photo").addEventListener("change", function(e){
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(){
-    photoData = reader.result;
-  };
-  reader.readAsDataURL(file);
-});
-
-document.getElementById("saveBtn").addEventListener("click", function(){
-  const record = {
-    date: date.value,
-    line: line.value,
-    weather: weather.value,
-    outside_temp: Number(outside_temp.value),
-    humidity: Number(humidity.value),
-    in_ec: Number(in_ec.value),
-    in_ph: Number(in_ph.value),
-    in_time: in_time.value,
-    out_ec: Number(out_ec.value),
-    out_ph: Number(out_ph.value),
-    out_time: out_time.value,
-    work_start: work_start.value,
-    work_end: work_end.value,
-    note: note.value,
-    photo: photoData
+function save(){
+  const d={
+    date:date.value,
+    line:line.value,
+    temp:Number(temp.value)||0,
+    humidity:Number(humidity.value)||0,
+    ss:Number(ss.value)||0,
+    s:Number(s.value)||0,
+    m:Number(m.value)||0,
+    l:Number(l.value)||0,
+    ll:Number(ll.value)||0,
+    lll:Number(lll.value)||0,
+    ng:Number(ng.value)||0
   };
 
-  data.push(record);
-  localStorage.setItem("ichigo", JSON.stringify(data));
-  photoData = "";
-  render();
-});
+  data.push(d);
+  localStorage.setItem("ichigo",JSON.stringify(data));
 
-document.getElementById("resetBtn").addEventListener("click", function(){
-  if(confirm("全部削除する？")){
-    localStorage.removeItem("ichigo");
-    data = [];
-    render();
-  }
-});
-
-function render(){
-  list.innerHTML = "";
-
-  data.forEach(d=>{
-    let advice = "";
-
-    if(d.in_ec > 1.5) advice += "⚠ EC高 ";
-    if(d.out_ec > d.in_ec) advice += "⚠ 廃液異常 ";
-    if(d.in_ph < 5.5 || d.in_ph > 6.5) advice += "⚠ pHズレ ";
-    if(d.humidity > 80) advice += "⚠ 湿度高 ";
-
-    const div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <b>${d.date}</b> / 列 ${d.line}<br>
-      天気:${d.weather} 外気温:${d.outside_temp}℃ 湿度:${d.humidity}%<br>
-      給液 EC:${d.in_ec} pH:${d.in_ph}<br>
-      廃液 EC:${d.out_ec} pH:${d.out_ph}<br>
-      勤務 ${d.work_start}〜${d.work_end}<br>
-      ${d.note}<br>
-      <b>${advice}</b>
-      ${d.photo ? `<img src="${d.photo}">` : ""}
-    `;
-
-    list.appendChild(div);
-  });
+  alert("保存した");
 }
-
-render();
 </script>
 
 </body>
