@@ -16,6 +16,9 @@
 
 <canvas id="chart"></canvas>
 
+<h3>📋 作業履歴</h3>
+<div id="workList"></div>
+
 <script>
 let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
 
@@ -47,13 +50,12 @@ data.forEach(d=>{
   tempSum += d.temp;
 });
 
-// 🔴 月順ソート
+// 🔴 ソート
 const labels = Object.keys(monthly).sort();
 
 // 🔴 kg変換
 const totalKg = (totalAll / 1000).toFixed(2);
 
-// 表示
 document.getElementById("total").innerText =
 "総収量: " + totalKg + " kg";
 
@@ -65,16 +67,23 @@ let avgTemp = data.length ? (tempSum/data.length).toFixed(1) : 0;
 document.getElementById("tempAvg").innerText =
 "平均ハウス内気温: " + avgTemp + "℃";
 
-// 🔴 グラフもkg表示にする
+// グラフ
 const datasets = ["SS","S","M","L","LL","LLL","NG"].map(size=>({
   label:size,
-  data:labels.map(m=> (monthly[m][size] / 1000).toFixed(2))
+  data:labels.map(m=> (monthly[m][size]/1000).toFixed(2))
 }));
 
 new Chart(document.getElementById("chart"),{
   type:"bar",
   data:{ labels, datasets }
 });
+
+// 🔴 作業履歴
+let workHTML = "";
+data.forEach(d=>{
+  workHTML += `<p>${d.date}（${d.user}）：${d.work || "-"}</p>`;
+});
+document.getElementById("workList").innerHTML = workHTML;
 </script>
 
 </body>
