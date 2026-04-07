@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <title>収量分析</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+table { width:100%; border-collapse: collapse; margin-top:20px; }
+th, td { border:1px solid #ccc; padding:5px; text-align:center; }
+th { background:#eee; }
+</style>
+
 </head>
 
 <body>
@@ -15,6 +22,16 @@
 <p id="tempAvg"></p>
 
 <canvas id="chart"></canvas>
+
+<h3>📅 月別データ一覧</h3>
+<table id="table">
+<tr>
+<th>月</th>
+<th>総収量(kg)</th>
+<th>SS</th><th>S</th><th>M</th>
+<th>L</th><th>2L</th><th>3L</th><th>規格外</th>
+</tr>
+</table>
 
 <h3>📋 作業履歴</h3>
 <div id="workList"></div>
@@ -50,10 +67,10 @@ data.forEach(d=>{
   tempSum += d.temp;
 });
 
-// 🔴 ソート
+// ソート
 const labels = Object.keys(monthly).sort();
 
-// 🔴 kg変換
+// 総収量kg
 const totalKg = (totalAll / 1000).toFixed(2);
 
 document.getElementById("total").innerText =
@@ -78,12 +95,38 @@ new Chart(document.getElementById("chart"),{
   data:{ labels, datasets }
 });
 
-// 🔴 作業履歴
+// 🔥 月別テーブル
+const table = document.getElementById("table");
+
+labels.forEach(m=>{
+  const row = document.createElement("tr");
+
+  const totalMonth =
+    monthly[m].SS+monthly[m].S+monthly[m].M+
+    monthly[m].L+monthly[m].LL+monthly[m].LLL+monthly[m].NG;
+
+  row.innerHTML = `
+    <td>${m}</td>
+    <td>${(totalMonth/1000).toFixed(2)}</td>
+    <td>${(monthly[m].SS/1000).toFixed(2)}</td>
+    <td>${(monthly[m].S/1000).toFixed(2)}</td>
+    <td>${(monthly[m].M/1000).toFixed(2)}</td>
+    <td>${(monthly[m].L/1000).toFixed(2)}</td>
+    <td>${(monthly[m].LL/1000).toFixed(2)}</td>
+    <td>${(monthly[m].LLL/1000).toFixed(2)}</td>
+    <td>${(monthly[m].NG/1000).toFixed(2)}</td>
+  `;
+
+  table.appendChild(row);
+});
+
+// 作業履歴（新しい順）
 let workHTML = "";
-data.forEach(d=>{
+data.slice().reverse().forEach(d=>{
   workHTML += `<p>${d.date}（${d.user}）：${d.work || "-"}</p>`;
 });
 document.getElementById("workList").innerHTML = workHTML;
+
 </script>
 
 </body>
