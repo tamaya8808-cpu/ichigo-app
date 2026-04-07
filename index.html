@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
 
 <style>
 body { font-family:sans-serif; padding:15px; background:#f5f5f5; }
-input, textarea, button { width:100%; padding:10px; margin:5px 0; }
+input, textarea, select, button { width:100%; padding:10px; margin:5px 0; }
 button { background:#2e7d32; color:#fff; border:none; }
 .admin { background:red; }
 </style>
@@ -15,11 +15,11 @@ button { background:#2e7d32; color:#fff; border:none; }
 
 <body>
 
-<h2>🍓 栽培管理</h2>
+<h2>🍓 栽培＋販売管理</h2>
 
 <h3>ログイン</h3>
 <input type="text" id="user" placeholder="名前">
-<input type="password" id="pass" placeholder="管理者パス（任意）">
+<input type="password" id="pass" placeholder="管理者パス">
 
 <input type="date" id="date">
 <input type="text" id="line" placeholder="列">
@@ -37,13 +37,29 @@ button { background:#2e7d32; color:#fff; border:none; }
 <input type="number" id="lll" placeholder="3L" min="0">
 <input type="number" id="ng" placeholder="規格外" min="0">
 
+<h3>販売データ</h3>
+<input type="text" id="buyer" placeholder="販売先">
+<input type="number" id="weight" placeholder="重量（g）" min="0">
+<input type="number" id="price" placeholder="単価（円/kg）" min="0">
+
+<select id="size">
+<option value="">サイズ選択</option>
+<option>SS</option>
+<option>S</option>
+<option>M</option>
+<option>L</option>
+<option>2L</option>
+<option>3L</option>
+<option>規格外</option>
+</select>
+
 <h3>作業内容</h3>
 <textarea id="work"></textarea>
 
 <button onclick="save()">保存</button>
 
 <button onclick="location.href='graph.html'">
-📊 グラフを見る
+📊 分析を見る
 </button>
 
 <button onclick="resetData()" class="admin">
@@ -52,8 +68,6 @@ button { background:#2e7d32; color:#fff; border:none; }
 
 <script>
 let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
-
-// 🔴 管理者パス（ここ変えろ）
 const ADMIN_PASS = "1234";
 
 function save(){
@@ -69,6 +83,7 @@ function save(){
     line:line.value,
     temp:Number(temp.value)||0,
     humidity:Number(humidity.value)||0,
+
     ss:Number(ss.value)||0,
     s:Number(s.value)||0,
     m:Number(m.value)||0,
@@ -76,20 +91,24 @@ function save(){
     ll:Number(ll.value)||0,
     lll:Number(lll.value)||0,
     ng:Number(ng.value)||0,
+
+    buyer:buyer.value,
+    weight:Number(weight.value)||0,
+    price:Number(price.value)||0,
+    size:size.value,
+
     work:work.value
   };
 
   data.push(d);
   localStorage.setItem("ichigo",JSON.stringify(data));
 
-  document.querySelectorAll("input, textarea").forEach(i=>i.value="");
+  document.querySelectorAll("input, textarea, select").forEach(i=>i.value="");
 
   alert("保存した");
 }
 
-// 🔴 管理者のみ削除
 function resetData(){
-
   if(pass.value !== ADMIN_PASS){
     alert("管理者のみ");
     return;
