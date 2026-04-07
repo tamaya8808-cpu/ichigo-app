@@ -27,7 +27,7 @@ th { background:#eee; }
 <h3>📅 月別一覧</h3>
 <table id="table">
 <tr>
-<th>月</th><th>総収量kg</th><th>売上</th>
+<th>月</th><th>収量kg</th><th>売上</th>
 </tr>
 </table>
 
@@ -45,9 +45,8 @@ let totalSales = 0;
 
 data.forEach(d=>{
   const month = d.date?.slice(0,7);
-
   if(!monthly[month]){
-    monthly[month] = {total:0,sales:0};
+    monthly[month] = {total:0, sales:0};
   }
 
   const total = d.ss+d.s+d.m+d.l+d.ll+d.lll+d.ng;
@@ -65,7 +64,6 @@ data.forEach(d=>{
   }
 });
 
-// ソート
 const labels = Object.keys(monthly).sort();
 
 // 表示
@@ -81,31 +79,29 @@ document.getElementById("tempAvg").innerText =
 document.getElementById("sales").innerText =
 "総売上: " + totalSales.toFixed(0) + "円";
 
-// テーブル
-const table = document.getElementById("table");
-
-labels.forEach(m=>{
-  const row = document.createElement("tr");
-
-  row.innerHTML = `
-    <td>${m}</td>
-    <td>${(monthly[m].total/1000).toFixed(2)}</td>
-    <td>${monthly[m].sales.toFixed(0)}</td>
-  `;
-
-  table.appendChild(row);
-});
-
-// グラフ
+// グラフ（←ここが修正ポイント）
 new Chart(document.getElementById("chart"),{
   type:"bar",
   data:{
     labels,
     datasets:[{
-      label:"収量kg",
-      data:labels.map(m=> (monthly[m].total/1000).toFixed(2))
+      label:"収量(kg)",
+      data:labels.map(m=> monthly[m].total/1000)
     }]
   }
+});
+
+// テーブル
+const table = document.getElementById("table");
+
+labels.forEach(m=>{
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td>${m}</td>
+    <td>${(monthly[m].total/1000).toFixed(2)}</td>
+    <td>${monthly[m].sales.toFixed(0)}</td>
+  `;
+  table.appendChild(row);
 });
 
 // 作業履歴
