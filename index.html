@@ -10,12 +10,13 @@ body { font-family:sans-serif; padding:15px; background:#f5f5f5; }
 input, textarea, select, button { width:100%; padding:10px; margin:5px 0; }
 button { background:#2e7d32; color:#fff; border:none; }
 .admin { background:red; }
+.box { border:1px solid #ccc; padding:10px; margin:10px 0; background:#fff; }
 </style>
 </head>
 
 <body>
 
-<h2>🍓 栽培＋販売管理</h2>
+<h2>🍓 栽培＋販売管理（完全版）</h2>
 
 <h3>ログイン</h3>
 <input type="text" id="user" placeholder="名前">
@@ -37,36 +38,39 @@ button { background:#2e7d32; color:#fff; border:none; }
 <input type="number" id="lll" placeholder="3L" min="0">
 <input type="number" id="ng" placeholder="規格外" min="0">
 
-<h3>販売データ</h3>
-<input type="text" id="buyer" placeholder="販売先">
-<input type="number" id="weight" placeholder="重量（g）" min="0">
-<input type="number" id="price" placeholder="単価（円/kg）" min="0">
-
-<select id="size">
-<option value="">サイズ選択</option>
-<option>SS</option>
-<option>S</option>
-<option>M</option>
-<option>L</option>
-<option>2L</option>
-<option>3L</option>
-<option>規格外</option>
-</select>
+<h3>販売データ（複数OK）</h3>
+<div id="salesArea"></div>
+<button onclick="addSale()">＋販売追加</button>
 
 <h3>作業内容</h3>
 <textarea id="work"></textarea>
 
 <button onclick="save()">保存</button>
-
 <button onclick="location.href='graph.html'">📊 分析</button>
-
-<button onclick="resetData()" class="admin">
-全削除（管理者のみ）
-</button>
+<button onclick="resetData()" class="admin">全削除（管理者のみ）</button>
 
 <script>
 let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
 const ADMIN_PASS = "1234";
+
+// 🔴 販売入力追加
+function addSale(){
+  const div = document.createElement("div");
+  div.className="box";
+
+  div.innerHTML = `
+    <input type="text" class="buyer" placeholder="販売先">
+    <select class="size">
+      <option>SS</option><option>S</option><option>M</option>
+      <option>L</option><option>2L</option><option>3L</option><option>規格外</option>
+    </select>
+    <input type="number" class="weight" placeholder="重量(g)" min="0">
+    <input type="number" class="price" placeholder="単価(円/kg)" min="0">
+    <button onclick="this.parentNode.remove()">削除</button>
+  `;
+
+  document.getElementById("salesArea").appendChild(div);
+}
 
 function save(){
 
@@ -74,6 +78,17 @@ function save(){
     alert("日付入れて");
     return;
   }
+
+  let sales = [];
+
+  document.querySelectorAll("#salesArea > div").forEach(row=>{
+    sales.push({
+      buyer:row.querySelector(".buyer").value,
+      size:row.querySelector(".size").value,
+      weight:Number(row.querySelector(".weight").value)||0,
+      price:Number(row.querySelector(".price").value)||0
+    });
+  });
 
   const d={
     user:user.value || "名無し",
@@ -90,18 +105,15 @@ function save(){
     lll:Number(lll.value)||0,
     ng:Number(ng.value)||0,
 
-    buyer:buyer.value,
-    weight:Number(weight.value)||0,
-    price:Number(price.value)||0,
-    size:size.value,
-
+    sales:sales,
     work:work.value
   };
 
   data.push(d);
   localStorage.setItem("ichigo",JSON.stringify(data));
 
-  document.querySelectorAll("input, textarea, select").forEach(i=>i.value="");
+  document.querySelectorAll("input, textarea").forEach(i=>i.value="");
+  document.getElementById("salesArea").innerHTML="";
 
   alert("保存した");
 }
