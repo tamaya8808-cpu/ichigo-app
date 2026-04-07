@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>収量分析</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<h2>📊 月別収量分析</h2>
+
+<p id="total"></p>
+<p id="average"></p>
+<p id="tempAvg"></p>
+
+<canvas id="chart"></canvas>
+
+<script>
+let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
+
+let monthly = {};
+let totalAll = 0;
+let weightedSum = 0;
+let tempSum = 0;
+
+data.forEach(d=>{
+  const month = d.date?.slice(0,7);
+
+  if(!monthly[month]){
+    monthly[month] = {SS:0,S:0,M:0,L:0,LL:0,LLL:0,NG:0};
+  }
+
+  monthly[month].SS += d.ss;
+  monthly[month].S += d.s;
+  monthly[month].M += d.m;
+  monthly[month].L += d.l;
+  monthly[month].LL += d.ll;
+  monthly[month].LLL += d.lll;
+  monthly[month].NG += d.ng;
+
+  totalAll += d.ss+d.s+d.m+d.l+d.ll+d.lll+d.ng;
+
+  weightedSum += 
+    d.ss*1 + d.s*2 + d.m*3 + d.l*4 + d.ll*5 + d.lll*6;
+
+  tempSum += d.temp;
+});
+
+// 表示
+document.getElementById("total").innerText =
+"総収量: " + totalAll;
+
+let avgSize = totalAll ? (weightedSum/totalAll).toFixed(2) : 0;
+document.getElementById("average").innerText =
+"平均サイズ指数: " + avgSize;
+
+let avgTemp = data.length ? (tempSum/data.length).toFixed(1) : 0;
+document.getElementById("tempAvg").innerText =
+"平均ハウス内気温: " + avgTemp + "℃";
+
+// グラフ
+const labels = Object.keys(monthly);
+
+const datasets = ["SS","S","M","L","LL","LLL","NG"].map(size=>({
+  label:size,
+  data:labels.map(m=>monthly[m][size])
+}));
+
+new Chart(document.getElementById("chart"),{
+  type:"bar",
+  data:{ labels, datasets }
+});
+</script>
+
+</body>
+</html>
