@@ -15,31 +15,25 @@ th { background:#eee; }
 
 <body>
 
-<h2>📊 分析</h2>
+<h2>📊 分析（完全版）</h2>
 
 <p id="total"></p>
-<p id="average"></p>
-<p id="tempAvg"></p>
 <p id="sales"></p>
 
-<h3>📅 月別グラフ</h3>
+<h3>📅 月別</h3>
 <canvas id="monthChart"></canvas>
 
-<h3>📆 日別グラフ</h3>
+<h3>📆 日別</h3>
 <canvas id="dayChart"></canvas>
 
 <h3>📅 月別一覧</h3>
 <table id="monthTable">
-<tr>
-<th>月</th><th>収量kg</th><th>売上</th>
-</tr>
+<tr><th>月</th><th>収量kg</th><th>売上</th></tr>
 </table>
 
 <h3>📆 日別一覧</h3>
 <table id="dayTable">
-<tr>
-<th>日</th><th>収量kg</th>
-</tr>
+<tr><th>日</th><th>収量kg</th></tr>
 </table>
 
 <h3>📋 作業履歴</h3>
@@ -48,107 +42,86 @@ th { background:#eee; }
 <script>
 let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
 
-let monthly = {};
-let daily = {};
-let totalAll = 0;
-let weightedSum = 0;
-let tempSum = 0;
-let totalSales = 0;
+let monthly={}, daily={};
+let totalAll=0, totalSales=0;
 
 data.forEach(d=>{
-  const month = d.date?.slice(0,7);
-  const day = d.date;
+  const m=d.date?.slice(0,7);
+  const day=d.date;
 
-  const total = d.ss+d.s+d.m+d.l+d.ll+d.lll+d.ng;
+  const total=d.ss+d.s+d.m+d.l+d.ll+d.lll+d.ng;
 
-  // 月
-  if(!monthly[month]){
-    monthly[month] = {total:0, sales:0};
-  }
-  monthly[month].total += total;
+  if(!monthly[m]) monthly[m]={total:0,sales:0};
+  if(!daily[day]) daily[day]=0;
 
-  // 日
-  if(!daily[day]){
-    daily[day] = 0;
-  }
-  daily[day] += total;
+  monthly[m].total+=total;
+  daily[day]+=total;
+  totalAll+=total;
 
-  totalAll += total;
-  weightedSum += total * 3;
-  tempSum += d.temp;
-
-  if(d.weight && d.price){
-    const sale = (d.weight/1000)*d.price;
-    monthly[month].sales += sale;
-    totalSales += sale;
+  if(d.sales){
+    d.sales.forEach(s=>{
+      const sale=(s.weight/1000)*s.price;
+      monthly[m].sales+=sale;
+      totalSales+=sale;
+    });
   }
 });
 
-// ソート
-const monthLabels = Object.keys(monthly).sort();
-const dayLabels = Object.keys(daily).sort();
+const mLabels=Object.keys(monthly).sort();
+const dLabels=Object.keys(daily).sort();
 
-// 表示
-document.getElementById("total").innerText =
-"総収量: " + (totalAll/1000).toFixed(2) + " kg";
+document.getElementById("total").innerText=
+"総収量: "+(totalAll/1000).toFixed(2)+" kg";
 
-document.getElementById("average").innerText =
-"平均サイズ指数: " + (weightedSum/totalAll).toFixed(2);
+document.getElementById("sales").innerText=
+"総売上: "+totalSales.toFixed(0)+" 円";
 
-document.getElementById("tempAvg").innerText =
-"平均気温: " + (tempSum/data.length).toFixed(1) + "℃";
-
-document.getElementById("sales").innerText =
-"総売上: " + totalSales.toFixed(0) + "円";
-
-// 🔥 月グラフ
+// 月グラフ
 new Chart(document.getElementById("monthChart"),{
   type:"bar",
   data:{
-    labels:monthLabels,
+    labels:mLabels,
     datasets:[{
-      label:"収量(kg)",
-      data:monthLabels.map(m=> monthly[m].total/1000)
+      label:"収量kg",
+      data:mLabels.map(m=>monthly[m].total/1000)
     }]
   }
 });
 
-// 🔥 日グラフ
+// 日グラフ
 new Chart(document.getElementById("dayChart"),{
   type:"line",
   data:{
-    labels:dayLabels,
+    labels:dLabels,
     datasets:[{
-      label:"日別収量(kg)",
-      data:dayLabels.map(d=> daily[d]/1000)
+      label:"日別収量kg",
+      data:dLabels.map(d=>daily[d]/1000)
     }]
   }
 });
 
 // 月テーブル
-const monthTable = document.getElementById("monthTable");
-monthLabels.forEach(m=>{
-  const row = document.createElement("tr");
-  row.innerHTML = `
+const mt=document.getElementById("monthTable");
+mLabels.forEach(m=>{
+  mt.innerHTML+=`
+  <tr>
     <td>${m}</td>
     <td>${(monthly[m].total/1000).toFixed(2)}</td>
     <td>${monthly[m].sales.toFixed(0)}</td>
-  `;
-  monthTable.appendChild(row);
+  </tr>`;
 });
 
 // 日テーブル
-const dayTable = document.getElementById("dayTable");
-dayLabels.forEach(d=>{
-  const row = document.createElement("tr");
-  row.innerHTML = `
+const dt=document.getElementById("dayTable");
+dLabels.forEach(d=>{
+  dt.innerHTML+=`
+  <tr>
     <td>${d}</td>
     <td>${(daily[d]/1000).toFixed(2)}</td>
-  `;
-  dayTable.appendChild(row);
+  </tr>`;
 });
 
-// 作業履歴
+// 履歴
 let html="";
 data.slice().reverse().forEach(d=>{
   html+=`<p>${d.date}（${d.user}）：${d.work||"-"}</p>`;
