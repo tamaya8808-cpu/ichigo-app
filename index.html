@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -9,6 +9,7 @@
 body { font-family:sans-serif; padding:15px; background:#f5f5f5; }
 input, textarea, button { width:100%; padding:10px; margin:5px 0; }
 button { background:#2e7d32; color:#fff; border:none; }
+.admin { background:red; }
 </style>
 </head>
 
@@ -16,24 +17,28 @@ button { background:#2e7d32; color:#fff; border:none; }
 
 <h2>🍓 栽培管理</h2>
 
+<h3>ログイン</h3>
+<input type="text" id="user" placeholder="名前">
+<input type="password" id="pass" placeholder="管理者パス（任意）">
+
 <input type="date" id="date">
 <input type="text" id="line" placeholder="列">
 
 <h3>ハウス内環境</h3>
-<input type="number" id="temp" placeholder="ハウス内気温（℃）">
-<input type="number" id="humidity" placeholder="湿度">
+<input type="number" id="temp" placeholder="気温（℃）" min="0">
+<input type="number" id="humidity" placeholder="湿度" min="0">
 
 <h3>収量（g）</h3>
-<input type="number" id="ss" placeholder="SS">
-<input type="number" id="s" placeholder="S">
-<input type="number" id="m" placeholder="M">
-<input type="number" id="l" placeholder="L">
-<input type="number" id="ll" placeholder="2L">
-<input type="number" id="lll" placeholder="3L">
-<input type="number" id="ng" placeholder="規格外">
+<input type="number" id="ss" placeholder="SS" min="0">
+<input type="number" id="s" placeholder="S" min="0">
+<input type="number" id="m" placeholder="M" min="0">
+<input type="number" id="l" placeholder="L" min="0">
+<input type="number" id="ll" placeholder="2L" min="0">
+<input type="number" id="lll" placeholder="3L" min="0">
+<input type="number" id="ng" placeholder="規格外" min="0">
 
 <h3>作業内容</h3>
-<textarea id="work" placeholder="例：摘果・防除・換気調整など"></textarea>
+<textarea id="work"></textarea>
 
 <button onclick="save()">保存</button>
 
@@ -41,12 +46,15 @@ button { background:#2e7d32; color:#fff; border:none; }
 📊 グラフを見る
 </button>
 
-<button onclick="resetData()" style="background:red;">
-全削除
+<button onclick="resetData()" class="admin">
+全削除（管理者のみ）
 </button>
 
 <script>
 let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
+
+// 🔴 管理者パス（ここ変えろ）
+const ADMIN_PASS = "1234";
 
 function save(){
 
@@ -56,6 +64,7 @@ function save(){
   }
 
   const d={
+    user:user.value || "名無し",
     date:date.value,
     line:line.value,
     temp:Number(temp.value)||0,
@@ -78,7 +87,14 @@ function save(){
   alert("保存した");
 }
 
+// 🔴 管理者のみ削除
 function resetData(){
+
+  if(pass.value !== ADMIN_PASS){
+    alert("管理者のみ");
+    return;
+  }
+
   if(confirm("全部消す？")){
     localStorage.removeItem("ichigo");
     data=[];
