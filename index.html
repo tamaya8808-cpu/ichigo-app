@@ -51,7 +51,7 @@ button { background:#2e7d32; color:#fff; border:none; }
 
 <script>
 let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
-const ADMIN_PASS = "1234";
+const ADMIN_PASS = "iina632";
 
 // 🔴 販売入力追加
 function addSale(){
@@ -115,7 +115,7 @@ function save(){
   document.querySelectorAll("input, textarea").forEach(i=>i.value="");
   document.getElementById("salesArea").innerHTML="";
 
-  alert("保存した");
+  alert("記録しました");
 }
 
 function resetData(){
@@ -124,10 +124,10 @@ function resetData(){
     return;
   }
 
-  if(confirm("全部消す？")){
+  if(confirm("全部削除しますか？")){
     localStorage.removeItem("ichigo");
     data=[];
-    alert("削除した");
+    alert("削除しました");
   }
 }
 </script>
