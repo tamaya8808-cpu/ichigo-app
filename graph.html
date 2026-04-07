@@ -50,9 +50,12 @@ data.forEach(d=>{
 // 🔴 月順ソート
 const labels = Object.keys(monthly).sort();
 
+// 🔴 kg変換
+const totalKg = (totalAll / 1000).toFixed(2);
+
 // 表示
 document.getElementById("total").innerText =
-"総収量: " + totalAll;
+"総収量: " + totalKg + " kg";
 
 let avgSize = totalAll ? (weightedSum/totalAll).toFixed(2) : 0;
 document.getElementById("average").innerText =
@@ -62,10 +65,10 @@ let avgTemp = data.length ? (tempSum/data.length).toFixed(1) : 0;
 document.getElementById("tempAvg").innerText =
 "平均ハウス内気温: " + avgTemp + "℃";
 
-// グラフ
+// 🔴 グラフもkg表示にする
 const datasets = ["SS","S","M","L","LL","LLL","NG"].map(size=>({
   label:size,
-  data:labels.map(m=>monthly[m][size])
+  data:labels.map(m=> (monthly[m][size] / 1000).toFixed(2))
 }));
 
 new Chart(document.getElementById("chart"),{
