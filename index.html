@@ -38,10 +38,21 @@ button { background:#2e7d32; color:#fff; border:none; }
 📊 グラフを見る
 </button>
 
+<button onclick="resetData()" style="background:red;">
+全削除
+</button>
+
 <script>
 let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
 
 function save(){
+
+  // 🔴 日付チェック
+  if(!date.value){
+    alert("日付入れて");
+    return;
+  }
+
   const d={
     date:date.value,
     line:line.value,
@@ -59,7 +70,19 @@ function save(){
   data.push(d);
   localStorage.setItem("ichigo",JSON.stringify(data));
 
+  // 🔴 入力リセット
+  document.querySelectorAll("input").forEach(i=>i.value="");
+
   alert("保存した");
+}
+
+// 🔴 全削除
+function resetData(){
+  if(confirm("全部消す？")){
+    localStorage.removeItem("ichigo");
+    data=[];
+    alert("削除した");
+  }
 }
 </script>
 
