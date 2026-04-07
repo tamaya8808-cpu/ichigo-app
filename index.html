@@ -7,7 +7,7 @@
 
 <style>
 body { font-family:sans-serif; padding:15px; background:#f5f5f5; }
-input, button { width:100%; padding:10px; margin:5px 0; }
+input, textarea, button { width:100%; padding:10px; margin:5px 0; }
 button { background:#2e7d32; color:#fff; border:none; }
 </style>
 </head>
@@ -23,7 +23,7 @@ button { background:#2e7d32; color:#fff; border:none; }
 <input type="number" id="temp" placeholder="ハウス内気温（℃）">
 <input type="number" id="humidity" placeholder="湿度">
 
-<h3>収量</h3>
+<h3>収量（g）</h3>
 <input type="number" id="ss" placeholder="SS">
 <input type="number" id="s" placeholder="S">
 <input type="number" id="m" placeholder="M">
@@ -31,6 +31,9 @@ button { background:#2e7d32; color:#fff; border:none; }
 <input type="number" id="ll" placeholder="2L">
 <input type="number" id="lll" placeholder="3L">
 <input type="number" id="ng" placeholder="規格外">
+
+<h3>作業内容</h3>
+<textarea id="work" placeholder="例：摘果・防除・換気調整など"></textarea>
 
 <button onclick="save()">保存</button>
 
@@ -47,7 +50,6 @@ let data = JSON.parse(localStorage.getItem("ichigo")||"[]");
 
 function save(){
 
-  // 🔴 日付チェック
   if(!date.value){
     alert("日付入れて");
     return;
@@ -64,19 +66,18 @@ function save(){
     l:Number(l.value)||0,
     ll:Number(ll.value)||0,
     lll:Number(lll.value)||0,
-    ng:Number(ng.value)||0
+    ng:Number(ng.value)||0,
+    work:work.value
   };
 
   data.push(d);
   localStorage.setItem("ichigo",JSON.stringify(data));
 
-  // 🔴 入力リセット
-  document.querySelectorAll("input").forEach(i=>i.value="");
+  document.querySelectorAll("input, textarea").forEach(i=>i.value="");
 
   alert("保存した");
 }
 
-// 🔴 全削除
 function resetData(){
   if(confirm("全部消す？")){
     localStorage.removeItem("ichigo");
